@@ -1,0 +1,1594 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>VISITA TERNIUM - SISTEMA EMPRESARIAL</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- EMAILJS -->
+<script
+src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+</script>
+
+<script>
+
+/* =========================================
+CONFIGURE AQUI
+========================================= */
+
+emailjs.init('SUA_PUBLIC_KEY');
+
+const SERVICE_ID = 'SEU_SERVICE_ID';
+const TEMPLATE_ID = 'SEU_TEMPLATE_ID';
+
+</script>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body{
+background:linear-gradient(135deg,#e0f2fe,#f8fafc);
+display:flex;
+min-height:100vh;
+color:#0f172a;
+}
+
+.sidebar{
+width:280px;
+background:linear-gradient(180deg,#020617,#0f172a);
+color:white;
+padding:30px 22px;
+box-shadow:4px 0 20px rgba(0,0,0,0.15);
+position:relative;
+overflow:hidden;
+}
+
+.sidebar::before{
+content:'';
+position:absolute;
+width:220px;
+height:220px;
+background:rgba(56,189,248,0.12);
+border-radius:50%;
+top:-80px;
+right:-80px;
+}
+
+.logo{
+font-size:28px;
+font-weight:800;
+margin-bottom:45px;
+color:#38bdf8;
+letter-spacing:1px;
+position:relative;
+z-index:2;
+}
+
+.menu{
+display:flex;
+flex-direction:column;
+gap:12px;
+position:relative;
+z-index:2;
+}
+
+.menu button{
+padding:16px;
+border:none;
+background:rgba(255,255,255,0.04);
+color:#cbd5e1;
+text-align:left;
+border-radius:14px;
+cursor:pointer;
+transition:0.3s;
+font-size:15px;
+font-weight:600;
+backdrop-filter:blur(5px);
+}
+
+.menu button:hover{
+background:#1e293b;
+transform:translateX(4px);
+}
+
+.menu button.active{
+background:linear-gradient(135deg,#38bdf8,#0ea5e9);
+color:#0f172a;
+font-weight:700;
+box-shadow:0 10px 20px rgba(14,165,233,0.25);
+}
+
+.main{
+flex:1;
+padding:35px;
+}
+
+.page{
+display:none;
+animation:fade 0.4s ease;
+}
+
+.page.active{
+display:block;
+}
+
+@keyframes fade{
+from{
+opacity:0;
+transform:translateY(10px);
+}
+
+to{
+opacity:1;
+transform:translateY(0px);
+}
+}
+
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:30px;
+background:white;
+padding:24px 28px;
+border-radius:20px;
+box-shadow:0 10px 25px rgba(15,23,42,0.06);
+}
+
+.topbar h1{
+font-size:30px;
+font-weight:800;
+color:#0f172a;
+}
+
+.form-section,
+.table-section,
+.grafico-card{
+background:rgba(255,255,255,0.95);
+padding:30px;
+border-radius:24px;
+box-shadow:0 15px 35px rgba(15,23,42,0.06);
+margin-bottom:30px;
+border:1px solid rgba(226,232,240,0.7);
+backdrop-filter:blur(10px);
+}
+
+.form-section h2,
+.table-section h2,
+.grafico-card h2{
+margin-bottom:25px;
+font-size:24px;
+font-weight:800;
+color:#0f172a;
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:24px;
+}
+
+label{
+display:block;
+margin-bottom:10px;
+font-weight:700;
+color:#334155;
+}
+
+input,
+select,
+textarea{
+width:100%;
+padding:14px 16px;
+border:1px solid #dbeafe;
+border-radius:14px;
+margin-bottom:22px;
+background:#f8fafc;
+transition:0.3s;
+font-size:15px;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+outline:none;
+border-color:#38bdf8;
+background:white;
+box-shadow:0 0 0 4px rgba(56,189,248,0.15);
+}
+
+textarea{
+resize:none;
+}
+
+.btn{
+background:linear-gradient(135deg,#0ea5e9,#0284c7);
+color:white;
+border:none;
+padding:15px 28px;
+border-radius:14px;
+cursor:pointer;
+font-weight:700;
+font-size:15px;
+transition:0.3s;
+box-shadow:0 10px 20px rgba(14,165,233,0.2);
+}
+
+.btn:hover{
+transform:translateY(-2px);
+box-shadow:0 15px 30px rgba(14,165,233,0.3);
+}
+
+.horarios{
+display:flex;
+gap:12px;
+flex-wrap:wrap;
+}
+
+.horario{
+padding:14px 22px;
+background:#e2e8f0;
+border:none;
+border-radius:14px;
+cursor:pointer;
+font-weight:700;
+transition:0.3s;
+}
+
+.horario:hover{
+transform:translateY(-2px);
+}
+
+.horario.active{
+background:linear-gradient(135deg,#0ea5e9,#0284c7);
+color:white;
+box-shadow:0 10px 20px rgba(14,165,233,0.25);
+}
+
+table{
+width:100%;
+border-collapse:separate;
+border-spacing:0 12px;
+margin-top:10px;
+}
+
+table th{
+background:#f8fafc;
+padding:16px;
+text-align:left;
+font-size:14px;
+text-transform:uppercase;
+letter-spacing:0.5px;
+color:#64748b;
+}
+
+table td{
+padding:18px 16px;
+background:white;
+border-top:none;
+vertical-align:top;
+box-shadow:0 5px 15px rgba(15,23,42,0.04);
+}
+
+table tr td:first-child{
+border-top-left-radius:14px;
+border-bottom-left-radius:14px;
+}
+
+table tr td:last-child{
+border-top-right-radius:14px;
+border-bottom-right-radius:14px;
+}
+
+.status{
+padding:10px 16px;
+border-radius:999px;
+font-size:12px;
+font-weight:800;
+display:inline-block;
+letter-spacing:0.3px;
+}
+
+.analise{
+background:#fef3c7;
+color:#b45309;
+}
+
+.agendada{
+background:#dbeafe;
+color:#1d4ed8;
+}
+
+.analisando{
+background:#ede9fe;
+color:#7c3aed;
+}
+
+.aprovacao{
+background:#fde68a;
+color:#92400e;
+}
+
+.execucao{
+background:#bfdbfe;
+color:#1d4ed8;
+}
+
+.finalizada{
+background:#dcfce7;
+color:#15803d;
+}
+
+.encerrada{
+background:#fee2e2;
+color:#dc2626;
+}
+
+.acoes{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+}
+
+.acoes button{
+border:none;
+padding:10px 14px;
+border-radius:12px;
+cursor:pointer;
+font-weight:700;
+color:white;
+transition:0.3s;
+}
+
+.acoes button:hover{
+transform:translateY(-2px);
+opacity:0.92;
+}
+
+.btn-agendar{
+background:#0ea5e9;
+}
+
+.btn-analisar{
+background:#7c3aed;
+}
+
+.btn-email{
+background:#eab308;
+}
+
+.btn-executar{
+background:#2563eb;
+}
+
+.btn-finalizar{
+background:#16a34a;
+}
+
+.btn-recusar{
+background:#dc2626;
+}
+
+.kpis{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+gap:22px;
+margin-bottom:30px;
+}
+
+.card{
+background:linear-gradient(135deg,#ffffff,#f8fafc);
+padding:28px;
+border-radius:24px;
+box-shadow:0 15px 30px rgba(15,23,42,0.06);
+position:relative;
+overflow:hidden;
+}
+
+.card::before{
+content:'';
+position:absolute;
+width:120px;
+height:120px;
+background:rgba(56,189,248,0.08);
+border-radius:50%;
+right:-40px;
+top:-40px;
+}
+
+.card h3{
+font-size:15px;
+margin-bottom:12px;
+color:#64748b;
+font-weight:700;
+position:relative;
+z-index:2;
+}
+
+.card p{
+font-size:38px;
+font-weight:800;
+color:#0f172a;
+position:relative;
+z-index:2;
+}
+
+.graficos{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:24px;
+}
+
+.modal{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(15,23,42,0.7);
+justify-content:center;
+align-items:center;
+z-index:9999;
+padding:20px;
+backdrop-filter:blur(5px);
+}
+
+.modal-content{
+background:white;
+width:720px;
+max-width:95%;
+padding:35px;
+border-radius:28px;
+box-shadow:0 25px 50px rgba(0,0,0,0.25);
+animation:fade 0.3s ease;
+}
+
+@media(max-width:900px){
+
+body{
+flex-direction:column;
+}
+
+.sidebar{
+width:100%;
+padding:20px;
+position:sticky;
+top:0;
+z-index:999;
+border-bottom-left-radius:20px;
+border-bottom-right-radius:20px;
+}
+
+.logo{
+font-size:22px;
+margin-bottom:20px;
+text-align:center;
+}
+
+.menu{
+flex-direction:row;
+flex-wrap:wrap;
+justify-content:center;
+}
+
+.menu button{
+flex:1 1 180px;
+text-align:center;
+padding:14px;
+font-size:14px;
+}
+
+.grid{
+grid-template-columns:1fr;
+}
+
+.graficos{
+grid-template-columns:1fr;
+}
+
+.topbar{
+flex-direction:column;
+align-items:flex-start;
+gap:12px;
+padding:20px;
+}
+
+.topbar h1{
+font-size:24px;
+}
+
+.main{
+padding:16px;
+}
+
+.form-section,
+.table-section,
+.grafico-card,
+.card{
+padding:20px;
+border-radius:20px;
+}
+
+.kpis{
+grid-template-columns:1fr;
+}
+
+.card p{
+font-size:30px;
+}
+
+.horarios{
+flex-direction:column;
+}
+
+.horario{
+width:100%;
+}
+
+.acoes{
+flex-direction:column;
+}
+
+.acoes button{
+width:100%;
+}
+
+table{
+display:block;
+overflow-x:auto;
+white-space:nowrap;
+}
+
+table th,
+table td{
+font-size:13px;
+padding:14px;
+}
+
+.modal{
+padding:10px;
+}
+
+.modal-content{
+width:100%;
+padding:22px;
+border-radius:20px;
+max-height:95vh;
+overflow-y:auto;
+}
+
+input,
+select,
+textarea{
+font-size:16px;
+}
+
+.btn{
+width:100%;
+}
+
+}
+
+@media(max-width:500px){
+
+.logo{
+font-size:20px;
+}
+
+.topbar h1{
+font-size:20px;
+}
+
+.form-section h2,
+.table-section h2,
+.grafico-card h2{
+font-size:20px;
+}
+
+.menu button{
+flex:1 1 100%;
+}
+
+.card p{
+font-size:26px;
+}
+
+.status{
+font-size:11px;
+padding:8px 12px;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+<div class="logo">
+VISITA TERNIUM
+</div>
+
+<div class="menu">
+
+<button
+class="active"
+onclick="mostrarPagina('solicitante', this)"
+>
+Área Solicitante
+</button>
+
+<button
+onclick="mostrarPagina('loginTecnico', this)"
+>
+Área Técnica
+</button>
+
+<button
+onclick="mostrarPagina('equipe', this)"
+>
+Equipe Técnica
+</button>
+
+</div>
+
+</aside>
+
+<main class="main">
+
+<!-- SOLICITANTE -->
+
+<div id="solicitante" class="page active">
+
+<div class="topbar">
+<h1>Portal do Solicitante</h1>
+</div>
+
+<section class="form-section">
+
+<h2>Nova Solicitação</h2>
+
+<div class="grid">
+
+<div>
+
+<label>Nome do Solicitante</label>
+<input type="text" id="nome">
+
+<label>Email do Solicitante</label>
+<input type="email" id="email">
+
+<label>Área / Setor</label>
+<input type="text" id="area">
+
+</div>
+
+<div>
+
+<label>Dia Disponível</label>
+<select id="dia">
+<option>Selecione</option>
+<option>Terça-feira</option>
+<option>Quinta-feira</option>
+</select>
+
+<label>Horário</label>
+
+<div class="horarios">
+
+<button class="horario">
+09:30h
+</button>
+
+<button class="horario">
+13:30h
+</button>
+
+</div>
+
+<br>
+
+<label>Descrição</label>
+<textarea id="descricao" rows="5"></textarea>
+
+</div>
+
+</div>
+
+<button class="btn" onclick="abrirSolicitacao()">
+Abrir Solicitação
+</button>
+
+</section>
+
+<section class="table-section">
+
+<h2>Minhas Solicitações</h2>
+
+<table>
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Status</th>
+<th>Técnico</th>
+<th>Ações</th>
+</tr>
+</thead>
+
+<tbody id="tabelaSolicitante"></tbody>
+
+</table>
+
+</section>
+
+</div>
+
+<!-- LOGIN TÉCNICO -->
+
+<div id="loginTecnico" class="page">
+
+<div class="topbar">
+<h1>Login Técnico</h1>
+</div>
+
+<section class="form-section">
+
+<label>Usuário</label>
+<input type="text" id="loginUsuario">
+
+<label>Senha</label>
+<input type="password" id="loginSenha">
+
+<button class="btn" onclick="loginTecnico()">
+Entrar
+</button>
+
+</section>
+
+</div>
+
+<!-- ÁREA TÉCNICA -->
+
+<div id="tecnico" class="page">
+
+<div class="topbar">
+<h1>Painel Técnico</h1>
+</div>
+
+<section class="kpis">
+
+<div class="card">
+<h3>Em análise</h3>
+<p id="kpiAnalise">0</p>
+</div>
+
+<div class="card">
+<h3>Em execução</h3>
+<p id="kpiExecucao">0</p>
+</div>
+
+<div class="card">
+<h3>Finalizadas</h3>
+<p id="kpiFinalizadas">0</p>
+</div>
+
+</section>
+
+<section class="table-section">
+
+<h2>Solicitações Técnicas</h2>
+
+<table>
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Solicitante</th>
+<th>Status</th>
+<th>Técnico</th>
+<th>Ações</th>
+</tr>
+</thead>
+
+<tbody id="tabelaTecnico"></tbody>
+
+</table>
+
+</section>
+
+<section class="graficos">
+
+<div class="grafico-card">
+<h2>Status</h2>
+<canvas id="graficoStatus"></canvas>
+</div>
+
+<div class="grafico-card">
+<h2>Áreas</h2>
+<canvas id="graficoArea"></canvas>
+</div>
+
+</section>
+
+</div>
+
+<!-- EQUIPE -->
+
+<div id="equipe" class="page">
+
+<div class="topbar">
+<h1>Cadastro Equipe Técnica</h1>
+</div>
+
+<section class="form-section">
+
+<div class="grid">
+
+<div>
+
+<label>Nome Técnico</label>
+<input type="text" id="novoTecnico">
+
+<label>Email</label>
+<input type="email" id="novoEmail">
+
+</div>
+
+<div>
+
+<label>Usuário</label>
+<input type="text" id="novoUsuario">
+
+<label>Senha</label>
+<input type="password" id="novaSenha">
+
+</div>
+
+</div>
+
+<button class="btn" onclick="cadastrarEquipe()">
+Cadastrar Técnico
+</button>
+
+</section>
+
+<section class="table-section">
+
+<h2>Equipe cadastrada</h2>
+
+<table>
+
+<thead>
+<tr>
+<th>Nome</th>
+<th>Email</th>
+<th>Usuário</th>
+</tr>
+</thead>
+
+<tbody id="tabelaEquipe"></tbody>
+
+</table>
+
+</section>
+
+</div>
+
+</main>
+
+<!-- MODAL -->
+
+<div class="modal" id="modal">
+
+<div class="modal-content">
+
+<h2 style="margin-bottom:20px;">
+Análise Técnica
+</h2>
+
+<label>Email Técnico</label>
+<input type="email" id="emailTecnico">
+
+<label>Tipo</label>
+<select id="tipoServico">
+<option>Homem/Hora</option>
+<option>Serviço</option>
+</select>
+
+<label>Necessita orçamento?</label>
+<select id="orcamento">
+<option>Sim</option>
+<option>Não</option>
+</select>
+
+<label>Compra material</label>
+<select id="material">
+<option>45 dias compra material</option>
+<option>Não necessário</option>
+</select>
+
+<label>Programação</label>
+<select id="programacao">
+<option>5+3</option>
+<option>Imediata</option>
+</select>
+
+<label>Descrição Técnica</label>
+<textarea id="dadosTecnicos" rows="5"></textarea>
+
+<br><br>
+
+<button class="btn" onclick="confirmarAprovacao()">
+Enviar Aprovação
+</button>
+
+<button
+class="btn-recusar"
+onclick="fecharModal()"
+style="padding:14px 24px;border:none;border-radius:12px;color:white;cursor:pointer;">
+Cancelar
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+let horarioSelecionado = '';
+
+const horarios = document.querySelectorAll('.horario');
+
+horarios.forEach(btn=>{
+
+btn.addEventListener('click', ()=>{
+
+horarios.forEach(
+b => b.classList.remove('active')
+);
+
+btn.classList.add('active');
+
+horarioSelecionado = btn.innerText;
+
+});
+
+});
+
+let solicitacoes =
+JSON.parse(localStorage.getItem('solicitacoes')) || [];
+
+let equipe =
+JSON.parse(localStorage.getItem('equipe')) || [];
+
+let indexModal = null;
+
+/* LOGIN */
+
+function loginTecnico(){
+
+const usuario =
+document.getElementById('loginUsuario').value;
+
+const senha =
+document.getElementById('loginSenha').value;
+
+const tecnico = equipe.find(t =>
+
+t.usuario === usuario &&
+t.senha === senha
+
+);
+
+if(!tecnico){
+
+alert('Usuário inválido');
+return;
+
+}
+
+mostrarPagina(
+'tecnico',
+document.querySelectorAll('.menu button')[1]
+);
+
+alert('Bem-vindo ' + tecnico.nome);
+
+}
+
+/* CADASTRO EQUIPE */
+
+function cadastrarEquipe(){
+
+const nome =
+document.getElementById('novoTecnico').value;
+
+const email =
+document.getElementById('novoEmail').value;
+
+const usuario =
+document.getElementById('novoUsuario').value;
+
+const senha =
+document.getElementById('novaSenha').value;
+
+if(!nome || !email || !usuario || !senha){
+
+alert('Preencha todos os campos');
+return;
+
+}
+
+equipe.push({
+nome,
+email,
+usuario,
+senha
+});
+
+localStorage.setItem(
+'equipe',
+JSON.stringify(equipe)
+);
+
+renderizarEquipe();
+
+alert('Técnico cadastrado');
+
+}
+
+function renderizarEquipe(){
+
+const tabela =
+document.getElementById('tabelaEquipe');
+
+tabela.innerHTML = '';
+
+equipe.forEach(item=>{
+
+tabela.innerHTML += `
+<tr>
+<td>${item.nome}</td>
+<td>${item.email}</td>
+<td>${item.usuario}</td>
+</tr>
+`;
+
+});
+
+}
+
+/* SOLICITAÇÃO */
+
+function abrirSolicitacao(){
+
+const nome =
+document.getElementById('nome').value;
+
+const email =
+document.getElementById('email').value;
+
+const area =
+document.getElementById('area').value;
+
+const dia =
+document.getElementById('dia').value;
+
+const descricao =
+document.getElementById('descricao').value;
+
+if(
+!nome ||
+!email ||
+!area ||
+dia === 'Selecione' ||
+!horarioSelecionado
+){
+
+alert('Preencha todos os campos');
+return;
+
+}
+
+const nova = {
+
+id: Math.floor(Math.random() * 100000),
+
+nome,
+email,
+area,
+dia,
+descricao,
+
+horario: horarioSelecionado,
+
+status:'Em análise',
+
+tecnico:'Aguardando aceite',
+
+emailTecnico:'',
+
+tipoServico:'',
+
+orcamento:'',
+
+material:'',
+
+programacao:'',
+
+dadosTecnicos:''
+
+};
+
+solicitacoes.push(nova);
+
+/* ENVIO EMAIL */
+
+equipe.forEach(tecnico=>{
+
+emailjs.send(
+
+SERVICE_ID,
+TEMPLATE_ID,
+
+{
+
+to_email: tecnico.email,
+solicitante: nome,
+area: area,
+descricao: descricao,
+dia: dia,
+horario: horarioSelecionado
+
+}
+
+)
+.then(()=>{
+console.log('Email enviado');
+})
+.catch((erro)=>{
+console.log(erro);
+});
+
+});
+
+salvar();
+renderizar();
+
+alert('Solicitação enviada para equipe técnica');
+
+}
+
+function salvar(){
+
+localStorage.setItem(
+'solicitacoes',
+JSON.stringify(solicitacoes)
+);
+
+}
+
+function renderizar(){
+
+const tabelaSolicitante =
+document.getElementById('tabelaSolicitante');
+
+const tabelaTecnico =
+document.getElementById('tabelaTecnico');
+
+tabelaSolicitante.innerHTML = '';
+tabelaTecnico.innerHTML = '';
+
+solicitacoes.forEach((item,index)=>{
+
+let classe = '';
+
+switch(item.status){
+
+case 'Em análise':
+classe='analise';
+break;
+
+case 'Agendada':
+classe='agendada';
+break;
+
+case 'Técnico analisando':
+classe='analisando';
+break;
+
+case 'Aguardando aprovação':
+classe='aprovacao';
+break;
+
+case 'Em execução':
+classe='execucao';
+break;
+
+case 'Finalizada':
+classe='finalizada';
+break;
+
+case 'Encerrada':
+classe='encerrada';
+break;
+
+}
+
+/* SOLICITANTE */
+
+ tabelaSolicitante.innerHTML += `
+
+<tr>
+
+<td>#${item.id}</td>
+
+<td>
+
+<span class="status ${classe}">
+${item.status}
+</span>
+
+</td>
+
+<td>
+${item.tecnico}
+</td>
+
+<td>
+
+${item.status === 'Aguardando aprovação'
+? `
+
+<button
+class="btn-executar"
+onclick="aceitar(${index})"
+style="padding:10px;border:none;border-radius:10px;color:white;cursor:pointer;">
+Aceitar
+</button>
+
+<button
+class="btn-recusar"
+onclick="recusar(${index})"
+style="padding:10px;border:none;border-radius:10px;color:white;cursor:pointer;">
+Recusar
+</button>
+
+`
+: '-'}
+
+</td>
+
+</tr>
+
+`;
+
+/* TÉCNICO */
+
+ tabelaTecnico.innerHTML += `
+
+<tr>
+
+<td>#${item.id}</td>
+
+<td>
+${item.nome}
+<br><br>
+${item.email}
+</td>
+
+<td>
+<span class="status ${classe}">
+${item.status}
+</span>
+</td>
+
+<td>
+${item.tecnico}
+</td>
+
+<td>
+
+<div class="acoes">
+
+<button
+class="btn-agendar"
+onclick="agendar(${index})"
+>
+Agendar
+</button>
+
+<button
+class="btn-analisar"
+onclick="analisar(${index})"
+>
+Ir analisar
+</button>
+
+<button
+class="btn-email"
+onclick="abrirModal(${index})"
+>
+Enviar aprovação
+</button>
+
+<button
+class="btn-executar"
+onclick="executar(${index})"
+>
+Executar
+</button>
+
+<button
+class="btn-finalizar"
+onclick="finalizar(${index})"
+>
+Finalizar
+</button>
+
+</div>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+ dashboard();
+ graficos();
+ renderizarEquipe();
+
+}
+
+function agendar(index){
+
+const tecnico = prompt('Nome técnico');
+
+if(!tecnico) return;
+
+solicitacoes[index].status = 'Agendada';
+solicitacoes[index].tecnico = tecnico;
+
+salvar();
+renderizar();
+
+}
+
+function analisar(index){
+
+solicitacoes[index].status = 'Técnico analisando';
+
+salvar();
+renderizar();
+
+}
+
+function abrirModal(index){
+
+indexModal = index;
+
+document.getElementById('modal').style.display = 'flex';
+
+}
+
+function fecharModal(){
+
+document.getElementById('modal').style.display = 'none';
+
+}
+
+function confirmarAprovacao(){
+
+const item = solicitacoes[indexModal];
+
+item.emailTecnico =
+document.getElementById('emailTecnico').value;
+
+item.tipoServico =
+document.getElementById('tipoServico').value;
+
+item.orcamento =
+document.getElementById('orcamento').value;
+
+item.material =
+document.getElementById('material').value;
+
+item.programacao =
+document.getElementById('programacao').value;
+
+item.dadosTecnicos =
+document.getElementById('dadosTecnicos').value;
+
+item.status = 'Aguardando aprovação';
+
+salvar();
+renderizar();
+fecharModal();
+
+alert('EMAIL ENVIADO PARA O SOLICITANTE');
+
+}
+
+function aceitar(index){
+
+solicitacoes[index].status = 'Em execução';
+
+salvar();
+renderizar();
+
+}
+
+function recusar(index){
+
+solicitacoes[index].status = 'Encerrada';
+
+salvar();
+renderizar();
+
+}
+
+function executar(index){
+
+solicitacoes[index].status = 'Em execução';
+
+salvar();
+renderizar();
+
+}
+
+function finalizar(index){
+
+solicitacoes[index].status = 'Finalizada';
+
+salvar();
+renderizar();
+
+}
+
+function mostrarPagina(id, botao){
+
+ document.querySelectorAll('.page')
+ .forEach(p=>p.classList.remove('active'));
+
+ document.getElementById(id)
+ .classList.add('active');
+
+ document.querySelectorAll('.menu button')
+ .forEach(b=>b.classList.remove('active'));
+
+ botao.classList.add('active');
+
+}
+
+function dashboard(){
+
+ document.getElementById('kpiAnalise').innerText =
+ solicitacoes.filter(
+ s => s.status === 'Em análise'
+ ).length;
+
+ document.getElementById('kpiExecucao').innerText =
+ solicitacoes.filter(
+ s => s.status === 'Em execução'
+ ).length;
+
+ document.getElementById('kpiFinalizadas').innerText =
+ solicitacoes.filter(
+ s => s.status === 'Finalizada'
+ ).length;
+
+}
+
+let graficoStatus;
+let graficoArea;
+
+function graficos(){
+
+const ctx1 =
+document.getElementById('graficoStatus');
+
+const ctx2 =
+document.getElementById('graficoArea');
+
+if(graficoStatus){
+graficoStatus.destroy();
+}
+
+if(graficoArea){
+graficoArea.destroy();
+}
+
+graficoStatus =
+new Chart(ctx1,{
+
+type:'doughnut',
+
+data:{
+
+labels:[
+'Análise',
+'Execução',
+'Finalizada'
+],
+
+datasets:[{
+
+data:[
+
+solicitacoes.filter(
+s => s.status === 'Em análise'
+).length,
+
+solicitacoes.filter(
+s => s.status === 'Em execução'
+).length,
+
+solicitacoes.filter(
+s => s.status === 'Finalizada'
+).length
+
+]
+
+}]
+
+}
+
+});
+
+const areas = {};
+
+solicitacoes.forEach(item=>{
+
+areas[item.area] =
+(areas[item.area] || 0) + 1;
+
+});
+
+graficoArea =
+new Chart(ctx2,{
+
+type:'bar',
+
+data:{
+
+labels:Object.keys(areas),
+
+datasets:[{
+
+label:'Chamados',
+
+data:Object.values(areas)
+
+}]
+
+}
+
+});
+
+}
+
+renderizar();
+
+</script>
+
+</body>
+</html>
+```
