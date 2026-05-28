@@ -779,6 +779,225 @@ Cadastrar Técnico
 
 <script type="module">
 
+    window.abrirLinkStatus = function(tipo,index){
+
+const solicitacao = solicitacoes[index];
+
+let assunto = '';
+let mensagem = '';
+let status = '';
+
+if(tipo === 'AGENDADA'){
+
+status = 'Agendada';
+
+assunto =
+`VISITA TERNIUM - AGENDAMENTO #${solicitacao.id}`;
+
+mensagem = `
+Olá ${solicitacao.nome},
+
+Sua solicitação foi AGENDADA.
+
+================================
+
+DATA:
+${solicitacao.dia}
+
+HORÁRIO:
+${solicitacao.horario}
+
+TÉCNICO:
+${solicitacao.tecnico}
+
+================================
+`;
+
+atualizarFirebase(index,{
+status:'Agendada'
+});
+
+}
+
+if(tipo === 'ANALISE'){
+
+status = 'Técnico analisando';
+
+assunto =
+`VISITA TERNIUM - ANÁLISE #${solicitacao.id}`;
+
+mensagem = `
+Olá ${solicitacao.nome},
+
+Seu chamado está em análise técnica.
+
+================================
+
+TÉCNICO:
+${solicitacao.tecnico}
+
+================================
+`;
+
+atualizarFirebase(index,{
+status:'Técnico analisando'
+});
+
+}
+
+if(tipo === 'APROVACAO'){
+
+status = 'Aguardando aprovação';
+
+assunto =
+`VISITA TERNIUM - APROVAÇÃO #${solicitacao.id}`;
+
+mensagem = `
+Olá ${solicitacao.nome},
+
+Sua solicitação está aguardando aprovação.
+
+================================
+
+TÉCNICO:
+${solicitacao.tecnico}
+
+TIPO:
+${solicitacao.tipoServico}
+
+INFORMAÇÕES:
+
+${solicitacao.descricaoTecnica}
+
+================================
+`;
+
+atualizarFirebase(index,{
+status:'Aguardando aprovação'
+});
+
+}
+
+if(tipo === 'EXECUCAO'){
+
+status = 'Em execução';
+
+assunto =
+`VISITA TERNIUM - EXECUÇÃO #${solicitacao.id}`;
+
+mensagem = `
+Olá ${solicitacao.nome},
+
+Sua solicitação está EM EXECUÇÃO.
+
+================================
+
+TÉCNICO:
+${solicitacao.tecnico}
+
+================================
+`;
+
+atualizarFirebase(index,{
+status:'Em execução'
+});
+
+}
+
+if(tipo === 'FINALIZADA'){
+
+status = 'Finalizada';
+
+assunto =
+`VISITA TERNIUM - FINALIZADA #${solicitacao.id}`;
+
+mensagem = `
+Olá ${solicitacao.nome},
+
+Sua solicitação foi FINALIZADA.
+
+================================
+
+TÉCNICO:
+${solicitacao.tecnico}
+
+================================
+`;
+
+atualizarFirebase(index,{
+status:'Finalizada'
+});
+
+}
+
+const url =
+`https://outlook.office.com/mail/deeplink/compose` +
+`?to=${encodeURIComponent(solicitacao.email)}` +
+`&subject=${encodeURIComponent(assunto)}` +
+`&body=${encodeURIComponent(mensagem)}`;
+
+window.open(url,'_blank');
+
+}
+
+    window.abrirOutlookWeb = function(){
+
+const solicitacao =
+solicitacoes[indexTecnicoAtual];
+
+const assunto =
+`APROVAÇÃO VISITA TERNIUM #${solicitacao.id}`;
+
+const mensagem = `
+Olá,
+
+Solicitação aprovada.
+
+================================
+
+SOLICITANTE:
+${solicitacao.nome}
+
+EMAIL:
+${solicitacao.email}
+
+ÁREA:
+${solicitacao.area}
+
+DATA:
+${solicitacao.dia}
+
+HORÁRIO:
+${solicitacao.horario}
+
+================================
+
+TÉCNICO:
+${solicitacao.tecnico}
+
+TIPO:
+${solicitacao.tipoServico}
+
+INFORMAÇÕES TÉCNICAS:
+
+${solicitacao.descricaoTecnica}
+
+================================
+
+STATUS:
+APROVADO
+`;
+
+const url =
+`https://outlook.office.com/mail/deeplink/compose` +
+`?to=${encodeURIComponent(solicitacao.email)}` +
+`&subject=${encodeURIComponent(assunto)}` +
+`&body=${encodeURIComponent(mensagem)}`;
+
+window.open(url,'_blank');
+
+}
+
 import { initializeApp }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
@@ -1027,19 +1246,39 @@ horarioSelecionado = btn.innerText;
 
 window.abrirSolicitacao = function(){
 
-const nome=document.getElementById('nome').value;
-const email=document.getElementById('email').value;
-const area=document.getElementById('area').value;
-const dia=document.getElementById('dia').value;
-const descricao=document.getElementById('descricao').value;
+const nome =
+document.getElementById('nome').value;
+
+const email =
+document.getElementById('email').value;
+
+const area =
+document.getElementById('area').value;
+
+const dia =
+document.getElementById('dia').value;
+
+const descricao =
+document.getElementById('descricao').value;
 
 if(!nome || !email || !area || !horarioSelecionado || !dia){
+
 alert('Preencha todos os campos');
+
 return;
+
 }
 
+/* GERA ID */
+
+const id =
+Math.floor(Math.random()*100000);
+
+/* NOVA SOLICITAÇÃO */
+
 const nova = {
-id:Math.floor(Math.random()*100000),
+
+id,
 nome,
 email,
 area,
@@ -1051,12 +1290,97 @@ tecnico:'Aguardando',
 tipoServico:'',
 descricaoTecnica:'',
 aprovacao:'Pendente'
+
 };
 
-const novaRef = push(ref(db,'solicitacoes'));
+/* SALVA FIREBASE */
+
+const novaRef =
+push(ref(db,'solicitacoes'));
+
 set(novaRef,nova);
 
-alert('Solicitação enviada');
+/* PEGA EMAILS DOS TÉCNICOS */
+
+const emailsTecnicos =
+equipe
+.map(item => item.email)
+.filter(email => email)
+.join(';');
+
+/* ASSUNTO */
+
+const assunto =
+encodeURIComponent(
+`[VISITA TERNIUM] Nova Solicitação #${id}`
+);
+
+/* EMAIL PROFISSIONAL */
+
+const mensagem =
+encodeURIComponent(`
+
+Olá Equipe Técnica,
+
+Uma nova solicitação de visita foi aberta no portal VISITA TERNIUM.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 DADOS DA SOLICITAÇÃO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔹 ID:
+#${id}
+
+🔹 Solicitante:
+${nome}
+
+🔹 Email:
+${email}
+
+🔹 Área:
+${area}
+
+🔹 Data:
+${dia}
+
+🔹 Horário:
+${horarioSelecionado}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📄 DESCRIÇÃO DA VISITA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${descricao}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+EM ANÁLISE
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Favor validar a solicitação no portal.
+
+Atenciosamente,
+
+VISITA TERNIUM
+Portal Inteligente
+
+`);
+
+/* ABRE OUTLOOK */
+
+const url =
+`https://outlook.office.com/mail/deeplink/compose` +
+`?to=${encodeURIComponent(emailsTecnicos)}` +
+`&subject=${assunto}` +
+`&body=${mensagem}`;
+
+window.open(url,'_blank');
+
+alert('Solicitação enviada com sucesso.');
+
 }
 
 function carregarSolicitacoes(){
@@ -1157,8 +1481,16 @@ document.getElementById('modalAnalise').style.display='flex';
 
 window.confirmarAnalise = function(){
 
-const tipoServico = document.getElementById('tipoServico').value;
-const descricaoTecnica = document.getElementById('descricaoTecnica').value;
+const tipoServico =
+document.getElementById('tipoServico').value;
+
+const descricaoTecnica =
+document.getElementById('descricaoTecnica').value;
+
+const solicitacao =
+solicitacoes[indexAnalise];
+
+/* SALVA NO FIREBASE */
 
 atualizarFirebase(indexAnalise,{
 status:'Aguardando aprovação',
@@ -1166,8 +1498,55 @@ tipoServico,
 descricaoTecnica
 });
 
-document.getElementById('modalAnalise').style.display='none';
-alert('Enviado para aprovação');
+/* FECHA MODAL */
+
+document.getElementById('modalAnalise')
+.style.display='none';
+
+/* DADOS EMAIL */
+
+const assunto =
+encodeURIComponent(
+'APROVAÇÃO DE SOLICITAÇÃO #' + solicitacao.id
+);
+
+const mensagem =
+encodeURIComponent(
+
+`Olá ${solicitacao.nome},
+
+Sua solicitação precisa de aprovação.
+
+==================================
+
+👨‍🔧 Técnico:
+${solicitacao.tecnico}
+
+🛠 Tipo de Atendimento:
+${tipoServico}
+
+📄 Informações Técnicas:
+${descricaoTecnica}
+
+==================================
+
+Acesse o portal para aprovar ou reprovar.
+
+`
+);
+
+/* ABRE OUTLOOK WEB */
+
+window.open(
+
+`https://outlook.office.com/mail/deeplink/compose?to=${solicitacao.email}&subject=${assunto}&body=${mensagem}`,
+
+'_blank'
+
+);
+
+alert('Solicitação enviada para aprovação');
+
 }
 
 window.aprovar = function(index){
@@ -1177,15 +1556,22 @@ const emailDigitado = prompt(
 );
 
 if(!emailDigitado){
+
 alert('Digite o email para aprovar.');
+
 return;
+
 }
 
+const solicitacao = solicitacoes[index];
+
 const emailOriginal =
-solicitacoes[index].email.toLowerCase().trim();
+solicitacao.email.toLowerCase().trim();
 
 const emailInformado =
 emailDigitado.toLowerCase().trim();
+
+/* VALIDA EMAIL */
 
 if(emailOriginal !== emailInformado){
 
@@ -1194,14 +1580,105 @@ alert(
 );
 
 return;
+
 }
 
+/* ATUALIZA FIREBASE */
+
 atualizarFirebase(index,{
+
 status:'Em execução',
+
 aprovacao:'Aprovado',
-aprovadoPor: solicitacoes[index].nome,
-emailAprovador: solicitacoes[index].email
+
+aprovadoPor: solicitacao.nome,
+
+emailAprovador: solicitacao.email
+
 });
+
+/* EMAILS DA EQUIPE */
+
+const emailsTecnicos =
+equipe
+.map(item => item.email)
+.filter(email => email)
+.join(';');
+
+/* ASSUNTO */
+
+const assunto =
+encodeURIComponent(
+`[VISITA TERNIUM] Solicitação APROVADA #${solicitacao.id}`
+);
+
+/* EMAIL PROFISSIONAL */
+
+const mensagem =
+encodeURIComponent(`
+
+Olá Equipe Técnica,
+
+A solicitação abaixo foi APROVADA pelo solicitante.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ DADOS DA SOLICITAÇÃO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔹 ID:
+#${solicitacao.id}
+
+🔹 Solicitante:
+${solicitacao.nome}
+
+🔹 Email:
+${solicitacao.email}
+
+🔹 Área:
+${solicitacao.area}
+
+🔹 Data:
+${solicitacao.dia}
+
+🔹 Horário:
+${solicitacao.horario}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👨‍🔧 INFORMAÇÕES TÉCNICAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔹 Técnico:
+${solicitacao.tecnico}
+
+🔹 Tipo:
+${solicitacao.tipoServico}
+
+🔹 Descrição Técnica:
+
+${solicitacao.descricaoTecnica}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+APROVADO PARA EXECUÇÃO
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+VISITA TERNIUM
+Portal Inteligente
+
+`);
+
+/* OUTLOOK */
+
+const url =
+`https://outlook.office.com/mail/deeplink/compose` +
+`?to=${encodeURIComponent(emailsTecnicos)}` +
+`&subject=${assunto}` +
+`&body=${mensagem}`;
+
+window.open(url,'_blank');
 
 alert('Solicitação aprovada com sucesso.');
 
@@ -1287,9 +1764,9 @@ ${item.descricaoTecnica || 'Sem informações'}
 
 <button
 class="btn btn-executar"
-onclick="aprovar(${solicitacoes.indexOf(item)})">
+onclick="abrirOutlookWeb()">
 
-APROVAR
+APROVAR NO OUTLOOK
 
 </button>
 
@@ -1398,49 +1875,113 @@ ${aprovacaoHTML}
 
 }
 
-window.reprovar = function(index){
+window.reprovarSolicitacaoTecnica = function(){
 
-const emailDigitado = prompt(
-'Digite o EMAIL usado na solicitação para reprovar:'
-);
+const solicitacao =
+solicitacoes[indexTecnicoAtual];
 
-if(!emailDigitado){
+/* ATUALIZA FIREBASE */
 
-alert('Digite o email.');
-
-return;
-
-}
-
-const emailOriginal =
-solicitacoes[index].email.toLowerCase().trim();
-
-const emailInformado =
-emailDigitado.toLowerCase().trim();
-
-if(emailOriginal !== emailInformado){
-
-alert(
-'REPROVAÇÃO BLOQUEADA!\n\nSomente o solicitante original pode reprovar.'
-);
-
-return;
-
-}
-
-atualizarFirebase(index,{
+atualizarFirebase(indexTecnicoAtual,{
 
 status:'Finalizada',
 
 aprovacao:'Reprovado',
 
-aprovadoPor: solicitacoes[index].nome,
+aprovadoPor:
+solicitacao.nome,
 
-emailAprovador: solicitacoes[index].email
+emailAprovador:
+solicitacao.email
 
 });
 
+/* ASSUNTO */
+
+const assunto =
+encodeURIComponent(
+`[VISITA TERNIUM] Solicitação REPROVADA #${solicitacao.id}`
+);
+
+/* EMAIL */
+
+const mensagem =
+encodeURIComponent(`
+
+Olá Equipe Técnica,
+
+A solicitação abaixo foi REPROVADA pelo solicitante.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+❌ DADOS DA REPROVAÇÃO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔹 ID:
+#${solicitacao.id}
+
+🔹 Solicitante:
+${solicitacao.nome}
+
+🔹 Email:
+${solicitacao.email}
+
+🔹 Área:
+${solicitacao.area}
+
+🔹 Data:
+${solicitacao.dia}
+
+🔹 Horário:
+${solicitacao.horario}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👨‍🔧 ANÁLISE TÉCNICA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔹 Técnico:
+${solicitacao.tecnico}
+
+🔹 Tipo:
+${solicitacao.tipoServico}
+
+🔹 Informações Técnicas:
+
+${solicitacao.descricaoTecnica}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+REPROVADO PELO SOLICITANTE
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+VISITA TERNIUM
+Portal Inteligente
+
+`);
+
+/* EMAILS */
+
+const emailsTecnicos =
+equipe
+.map(item => item.email)
+.filter(email => email)
+.join(';');
+
+/* OUTLOOK */
+
+const url =
+`https://outlook.office.com/mail/deeplink/compose` +
+`?to=${encodeURIComponent(emailsTecnicos)}` +
+`&subject=${assunto}` +
+`&body=${mensagem}`;
+
+window.open(url,'_blank');
+
 alert('Solicitação reprovada.');
+
+fecharInfoTecnica();
 
 }
 
@@ -1720,7 +2261,7 @@ ${aprovadorTecnico}
 
 <button
 class="btn-agendar"
-onclick="agendar(${index})">
+onclick="abrirLinkStatus('AGENDADA', ${index})">
 
 Agendar
 
@@ -1728,7 +2269,7 @@ Agendar
 
 <button
 class="btn-analisar"
-onclick="analisar(${index})">
+onclick="abrirLinkStatus('ANALISE', ${index})">
 
 Analisar
 
@@ -1736,7 +2277,7 @@ Analisar
 
 <button
 class="btn-aprovacao"
-onclick="abrirAnalise(${index})">
+onclick="abrirModalAprovacao(${index})">
 
 Aprovação
 
@@ -1744,7 +2285,7 @@ Aprovação
 
 <button
 class="btn-executar"
-onclick="executar(${index})">
+onclick="abrirLinkStatus('EXECUCAO', ${index})">
 
 Executar
 
@@ -1752,11 +2293,21 @@ Executar
 
 <button
 class="btn-finalizar"
-onclick="finalizar(${index})">
+onclick="abrirLinkStatus('FINALIZADA', ${index})">
 
 Finalizar
 
 </button>
+
+<button
+class="btn-remover"
+onclick="removerSolicitacao(${index})">
+
+Remover
+
+</button>
+
+</div>
 
 <button
 class="btn-remover"
@@ -1778,6 +2329,156 @@ Remover
 dashboard();
 
 graficos();
+
+}
+
+/* =========================
+MODAL APROVAÇÃO TÉCNICA
+========================= */
+
+let indexAprovacaoAtual = null;
+
+window.abrirModalAprovacao = function(index){
+
+indexAprovacaoAtual = index;
+
+const solicitacao = solicitacoes[index];
+
+document.getElementById(
+'modalAprovacaoTecnica'
+).style.display = 'flex';
+
+/* PREENCHE AUTOMÁTICO */
+
+document.getElementById(
+'tipoAtendimentoTecnico'
+).value =
+solicitacao.tipoServico || 'Homem/Hora';
+
+document.getElementById(
+'descricaoTecnicaAprovacao'
+).value =
+solicitacao.descricaoTecnica || '';
+
+}
+
+/* FECHAR MODAL */
+
+window.fecharModalAprovacao = function(){
+
+document.getElementById(
+'modalAprovacaoTecnica'
+).style.display = 'none';
+
+}
+
+/* ENVIAR APROVAÇÃO */
+
+window.enviarAprovacaoOutlook = function(){
+
+const solicitacao =
+solicitacoes[indexAprovacaoAtual];
+
+const tipo =
+document.getElementById(
+'tipoAtendimentoTecnico'
+).value;
+
+const descricao =
+document.getElementById(
+'descricaoTecnicaAprovacao'
+).value;
+
+/* SALVA NO FIREBASE */
+
+atualizarFirebase(indexAprovacaoAtual,{
+
+status:'Aguardando aprovação',
+
+tipoServico: tipo,
+
+descricaoTecnica: descricao
+
+});
+
+/* MONTA EMAIL */
+
+const assunto =
+encodeURIComponent(
+`VISITA TERNIUM - APROVAÇÃO #${solicitacao.id}`
+);
+
+const mensagem =
+encodeURIComponent(`
+
+Olá ${solicitacao.nome},
+
+Sua solicitação foi encaminhada para aprovação técnica no portal VISITA TERNIUM.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 DADOS DA SOLICITAÇÃO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔹 ID:
+#${solicitacao.id}
+
+🔹 Solicitante:
+${solicitacao.nome}
+
+🔹 Área:
+${solicitacao.area}
+
+🔹 Data:
+${solicitacao.dia}
+
+🔹 Horário:
+${solicitacao.horario}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👨‍🔧 ANÁLISE TÉCNICA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔹 Técnico Responsável:
+${solicitacao.tecnico}
+
+🔹 Tipo de Atendimento:
+${tipo}
+
+🔹 Informações Técnicas:
+
+${descricao}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 STATUS ATUAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AGUARDANDO APROVAÇÃO
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Favor validar a solicitação no portal.
+
+Atenciosamente,
+
+Equipe Técnica
+VISITA TERNIUM
+
+`);
+/* ABRE OUTLOOK WEB */
+
+const url =
+`https://outlook.office.com/mail/deeplink/compose` +
+`?to=${encodeURIComponent(solicitacao.email)}` +
+`&subject=${assunto}` +
+`&body=${mensagem}`;
+
+window.open(url,'_blank');
+
+/* FECHA MODAL */
+
+fecharModalAprovacao();
+
+alert('Aprovação enviada para o Outlook.');
 
 }
 
@@ -1858,6 +2559,53 @@ FECHAR
 </div>
 
 </div>
+
+<div class="modal" id="modalAprovacaoTecnica">
+
+<div class="modal-content">
+
+<h2>Enviar Aprovação</h2>
+
+<label>Tipo de Atendimento</label>
+
+<select id="tipoAtendimentoTecnico">
+
+<option>Homem/Hora</option>
+
+<option>Serviço</option>
+
+</select>
+
+<label>Informações Técnicas</label>
+
+<textarea
+id="descricaoTecnicaAprovacao"
+rows="6"></textarea>
+
+<br><br>
+
+<button
+class="btn"
+onclick="enviarAprovacaoOutlook()">
+
+ENVIAR PARA APROVAÇÃO
+
+</button>
+
+<br><br>
+
+<button
+class="btn btn-remover"
+onclick="fecharModalAprovacao()">
+
+FECHAR
+
+</button>
+
+</div>
+
+</div>
+
 </body>
 </html>
 ```
