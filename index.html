@@ -541,11 +541,45 @@ Solicitante
 Área Técnica
 </button>
 
-<button onclick="mostrarPagina('equipe',this)">
+<button onclick="acessarEquipeTecnica()">
 Equipe Técnica
 </button>
 </div>
 </aside>
+
+<!-- LOGIN ADMIN ÁREA EQUIPE -->
+<script>
+
+const usuarioEquipeAdmin = "EQUIPE TERNIUM@";
+const senhaEquipeAdmin = "POOL";
+
+window.acessarEquipeTecnica = function(){
+
+const usuario = prompt("Usuário administrador:");
+if(!usuario) return;
+
+const senha = prompt("Senha administrador:");
+if(!senha) return;
+
+if(
+usuario === usuarioEquipeAdmin &&
+senha === senhaEquipeAdmin
+){
+
+mostrarPagina(
+'equipe',
+document.querySelectorAll('.menu button')[2]
+);
+
+}else{
+
+alert('Acesso negado.');
+
+}
+
+}
+
+</script>
 
 <main class="main">
 
@@ -724,6 +758,8 @@ Consultar Solicitações
 Cadastrar Técnico
 </button>
 </section>
+
+
 
 <section class="table-section">
 <h2>Equipe Cadastrada</h2>
@@ -1747,6 +1783,8 @@ graficos();
 
 carregarSolicitacoes();
 carregarEquipe();
+
+
 
 </script>
 
